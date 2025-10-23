@@ -1,33 +1,42 @@
-import { useMovieContext } from "../context/MovieContext";
-import "../css/MovieCard.css";
+import {createContext, useState, useContext, useEffect} from "react"
 
-function MovieCard({ movie }) {
-  const { isFavorite, addToFavorites, removeFromFavorites } = useMovieContext();
-  console.log('Context loaded:', { isFavorite, addToFavorites, removeFromFavorites }); 
-  const favorite = isFavorite(movie.id);
+const MovieContext = createContext()
 
-  function onFavoriteClick(e) {
-    e.preventDefault();
-    if (favorite) removeFromFavorites(movie.id);
-    else addToFavorites(movie);
-  }
+export const useMovieContext = () => useContext(MovieContext)
 
-  return (
-    <div className="movie-card">
-      <div className="movie-poster">
-        <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} />
-        <div className="movie-overlay">
-          <button className={`favorite-btn ${favorite ? "active" : ""}`} onClick={onFavoriteClick}>
-            ♥
-          </button>
-        </div>
-      </div>
-      <div className="movie-info">
-        <h3>{movie.title}</h3>
-        <p>{movie.release_date?.split("-")[0]}</p>
-      </div>
-    </div>
-  );
+export const MovieProvider = ({children}) => {
+    const [favorites, setFavorites] = useState([])
+
+    useEffect(() => {
+        const storedFavs = localStorage.getItem("favorites")
+
+        if (storedFavs) setFavorites(JSON.parse(storedFavs))
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem('favorites', JSON.stringify(favorites))
+    }, [favorites])
+
+    const addToFavorites = (movie) => {
+        setFavorites(prev => [...prev, movie])
+    }
+
+    const removeFromFavorites = (movieId) => {
+        setFavorites(prev => prev.filter(movie => movie.id !== movieId))
+    }
+    
+    const isFavorite = (movieId) => {
+        return favorites.some(movie => movie.id === movieId)
+    }
+
+    const value = {
+        favorites,
+        addToFavorites,
+        removeFromFavorites,
+        isFavorite
+    }
+
+    return <MovieContext.Provider value={value}>
+        {children}
+    </MovieContext.Provider>
 }
-
-export default MovieCard;

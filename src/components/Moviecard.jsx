@@ -1,9 +1,8 @@
-import { useMovieContext } from "../context/MovieContext"
 import "../css/MovieCard.css"
-
+import { useMovieContext } from "../context/MovieContext"
 
 function MovieCard({movie}) {
-   const {isFavorite,addToFavorites,removeFromFavorites} = useMovieContext()
+    const {isFavorite, addToFavorites, removeFromFavorites} = useMovieContext()
     const favorite = isFavorite(movie.id)
 
     function onFavoriteClick(e) {
